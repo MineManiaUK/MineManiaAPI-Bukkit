@@ -1,0 +1,4 @@
+name: MineManiaAPI-Bukkit
+version: '${project.version}'
+main: com.github.minemaniauk.minemaniaapibukkit.MineManiaAPI_Bukkit
+api-version: '1.20'
