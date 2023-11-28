@@ -85,7 +85,7 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
         Optional<Player> optionalPlayer = BukkitAdapter.getPlayer(event.getUser());
         return optionalPlayer.map(
                 player -> (UserActionIsVanishedEvent) event.set(this.isVanished(player))
-                ).orElse(null);
+        ).orElse(null);
     }
 
     @Override
