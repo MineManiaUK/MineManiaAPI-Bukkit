@@ -21,6 +21,7 @@
 package com.github.minemaniauk.bukkitapi;
 
 import com.github.cozyplugins.cozylibrary.CozyPlugin;
+import com.github.cozyplugins.cozylibrary.user.ConsoleUser;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.cozyplugins.cozylibrary.user.User;
 import com.github.minemaniauk.api.MineManiaAPI;
@@ -30,6 +31,7 @@ import com.github.minemaniauk.api.kerb.event.useraction.UserActionHasPermissionL
 import com.github.minemaniauk.api.kerb.event.useraction.UserActionIsOnlineEvent;
 import com.github.minemaniauk.api.kerb.event.useraction.UserActionIsVanishedEvent;
 import com.github.minemaniauk.api.kerb.event.useraction.UserActionMessageEvent;
+import com.github.minemaniauk.bukkitapi.listener.PlayerChatListener;
 import com.github.smuddgge.squishyconfiguration.ConfigurationFactory;
 import com.github.smuddgge.squishyconfiguration.interfaces.Configuration;
 import org.bukkit.Bukkit;
@@ -60,11 +62,15 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
 
         // Set up the configuration file.
         this.configuration = ConfigurationFactory.YAML
-                .create(this.getDataFolder(), "config.yml")
+                .create(this.getDataFolder(), "config")
                 .setDefaultPath("config.yml");
+        this.configuration.load();
 
         // Set up the api.
         this.api = MineManiaAPI.createAndSet(this.configuration, this);
+
+        // Register events.
+        this.getServer().getPluginManager().registerEvents(new PlayerChatListener(), this);
     }
 
     @Override
@@ -107,10 +113,13 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
         // Check if this server should not send the message.
         if (!event.getServerWhiteList().contains(this.getClientName())) return event;
 
+
         // Send all the players online the message.
         for (Player player : Bukkit.getOnlinePlayers()) {
             new PlayerUser(player).sendMessage(event.getFormattedMessage());
         }
+
+        new ConsoleUser().sendMessage(event.getFormattedMessage());
 
         return (PlayerChatEvent) event.complete();
     }

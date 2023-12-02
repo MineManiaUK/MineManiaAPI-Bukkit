@@ -21,11 +21,13 @@
 package com.github.minemaniauk.bukkitapi.listener;
 
 import com.github.kerbity.kerb.result.CompletableResultSet;
+import com.github.minemaniauk.api.MineManiaAPI;
 import com.github.minemaniauk.api.format.ChatFormat;
 import com.github.minemaniauk.api.kerb.event.player.PlayerChatEvent;
 import com.github.minemaniauk.api.kerb.event.player.PlayerPostChatEvent;
 import com.github.minemaniauk.bukkitapi.BukkitAdapter;
 import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
+import com.github.minemaniauk.bukkitapi.dependency.PlaceholderAPIDependency;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -76,7 +78,10 @@ public class PlayerChatListener implements Listener {
         // Broadcast the final chat event and not expect results.
         MineManiaAPI_Bukkit.getInstance().getAPI().callEvent(new PlayerChatEvent(
                 BukkitAdapter.getUser(event.getPlayer()),
-                chatFormat.parse(event.getMessage()),
+                PlaceholderAPIDependency.getInstance().parse(
+                        chatFormat.parse(event.getMessage()),
+                        event.getPlayer()
+                ),
                 serverWhiteList
         ));
     }
