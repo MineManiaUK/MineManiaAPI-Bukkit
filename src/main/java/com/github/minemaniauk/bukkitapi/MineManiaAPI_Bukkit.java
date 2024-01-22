@@ -31,6 +31,7 @@ import com.github.minemaniauk.api.kerb.event.useraction.UserActionHasPermissionL
 import com.github.minemaniauk.api.kerb.event.useraction.UserActionIsOnlineEvent;
 import com.github.minemaniauk.api.kerb.event.useraction.UserActionIsVanishedEvent;
 import com.github.minemaniauk.api.kerb.event.useraction.UserActionMessageEvent;
+import com.github.minemaniauk.api.user.MineManiaUser;
 import com.github.minemaniauk.bukkitapi.listener.PlayerChatListener;
 import com.github.smuddgge.squishyconfiguration.ConfigurationFactory;
 import com.github.smuddgge.squishyconfiguration.interfaces.Configuration;
@@ -42,6 +43,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Represents the instance of the
@@ -71,6 +73,16 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
 
         // Register events.
         this.getServer().getPluginManager().registerEvents(new PlayerChatListener(), this);
+    }
+
+    @Override
+    public @NotNull MineManiaUser getUser(@NotNull UUID uuid) {
+        return new MineManiaUser(uuid, Bukkit.getPlayer(uuid).getName());
+    }
+
+    @Override
+    public @NotNull MineManiaUser getUser(@NotNull String name) {
+        return new MineManiaUser(Bukkit.getPlayer(name).getUniqueId(), name);
     }
 
     @Override
