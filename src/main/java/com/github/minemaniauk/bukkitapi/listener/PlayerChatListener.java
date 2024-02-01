@@ -29,6 +29,7 @@ import com.github.minemaniauk.bukkitapi.BukkitAdapter;
 import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
 import com.github.minemaniauk.bukkitapi.dependency.PlaceholderAPIDependency;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
@@ -41,7 +42,7 @@ import java.util.List;
  */
 public class PlayerChatListener implements Listener {
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         // Stop players from seeing the message.
         try {
