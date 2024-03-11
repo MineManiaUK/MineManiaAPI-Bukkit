@@ -42,8 +42,12 @@ import java.util.List;
  */
 public class PlayerChatListener implements Listener {
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
+        if (event.getMessage().matches("^[0-9]$")) {
+            event.setCancelled(true);
+            return;
+        }
         // Stop players from seeing the message.
         try {
             event.getRecipients().clear();
