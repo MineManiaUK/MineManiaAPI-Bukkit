@@ -38,7 +38,6 @@ import com.github.smuddgge.squishyconfiguration.interfaces.Configuration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.MetadataValue;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,6 +50,7 @@ import java.util.UUID;
  */
 public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAPIContract {
 
+    private static @NotNull MineManiaAPI_Bukkit instance;
     private @NotNull Configuration configuration;
     private @NotNull MineManiaAPI api;
 
@@ -61,6 +61,9 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
 
     @Override
     public void onCozyEnable() {
+
+        // Set the instance.
+        MineManiaAPI_Bukkit.instance = this;
 
         // Set up the configuration file.
         this.configuration = ConfigurationFactory.YAML
@@ -180,20 +183,10 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
     /**
      * Used to get the instance of the bukkit api.
      * This can be called from any other plugin.
-     * <ul>
-     *     <li>Uses {@link Bukkit} to get the instance of the plugin</li>
-     * </ul>
      *
      * @return The instance of the bukkit api.
      */
     public static @NotNull MineManiaAPI_Bukkit getInstance() {
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("MineManiaAPI-Bukkit");
-
-        // Check if it doesn't exist.
-        if (plugin == null) {
-            throw new RuntimeException("Could not get the instance of the mine mania api bukkit.");
-        }
-
-        return (MineManiaAPI_Bukkit) plugin;
+        return MineManiaAPI_Bukkit.instance;
     }
 }
