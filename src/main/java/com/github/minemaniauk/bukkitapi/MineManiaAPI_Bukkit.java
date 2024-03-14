@@ -62,7 +62,7 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
     @Override
     public void onCozyEnable() {
 
-        // Set the instance.
+        // Set the instance.T
         MineManiaAPI_Bukkit.instance = this;
 
         // Set up the configuration file.
