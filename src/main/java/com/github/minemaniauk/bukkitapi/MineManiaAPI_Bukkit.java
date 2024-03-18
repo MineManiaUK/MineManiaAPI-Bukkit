@@ -21,38 +21,48 @@
 package com.github.minemaniauk.bukkitapi;
 
 import com.github.cozyplugins.cozylibrary.CozyPlugin;
+import com.github.cozyplugins.cozylibrary.command.command.command.ProgrammableCommand;
+import com.github.cozyplugins.cozylibrary.command.command.command.programmable.ProgrammableExecutor;
+import com.github.cozyplugins.cozylibrary.command.datatype.CommandArguments;
+import com.github.cozyplugins.cozylibrary.command.datatype.CommandStatus;
 import com.github.cozyplugins.cozylibrary.user.ConsoleUser;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.cozyplugins.cozylibrary.user.User;
 import com.github.minemaniauk.api.MineManiaAPI;
 import com.github.minemaniauk.api.MineManiaAPIContract;
+import com.github.minemaniauk.api.MineManiaLocation;
+import com.github.minemaniauk.api.database.collection.UserCollection;
+import com.github.minemaniauk.api.database.record.UserRecord;
 import com.github.minemaniauk.api.kerb.event.player.PlayerChatEvent;
-import com.github.minemaniauk.api.kerb.event.useraction.UserActionHasPermissionListEvent;
-import com.github.minemaniauk.api.kerb.event.useraction.UserActionIsOnlineEvent;
-import com.github.minemaniauk.api.kerb.event.useraction.UserActionIsVanishedEvent;
-import com.github.minemaniauk.api.kerb.event.useraction.UserActionMessageEvent;
+import com.github.minemaniauk.api.kerb.event.useraction.*;
 import com.github.minemaniauk.api.user.MineManiaUser;
+import com.github.minemaniauk.bukkitapi.inventory.InviteListInventory;
+import com.github.minemaniauk.bukkitapi.inventory.MenuInventory;
 import com.github.minemaniauk.bukkitapi.listener.PlayerChatListener;
 import com.github.smuddgge.squishyconfiguration.ConfigurationFactory;
 import com.github.smuddgge.squishyconfiguration.interfaces.Configuration;
+import com.github.smuddgge.squishydatabase.Query;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.metadata.MetadataValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Represents the instance of the
  * mine mania api for bukkit.
  */
-public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAPIContract {
+public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAPIContract, Listener {
 
     private static @NotNull MineManiaAPI_Bukkit instance;
     private @NotNull Configuration configuration;
     private @NotNull MineManiaAPI api;
+    private @NotNull Map<UUID, MineManiaLocation> teleportMap;
 
     @Override
     public boolean enableCommandDirectory() {
@@ -74,18 +84,63 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
         // Set up the api.
         this.api = MineManiaAPI.createAndSet(this.configuration, this);
 
+        // Set up the teleport list.
+        this.teleportMap = new HashMap<>();
+
         // Register events.
         this.getServer().getPluginManager().registerEvents(new PlayerChatListener(), this);
+        this.getServer().getPluginManager().registerEvents(this, this);
+
+        // Add commands.
+        this.addCommand(new ProgrammableCommand("menu")
+                .setDescription("Used to open the main menu.")
+                .setSyntax("/menu")
+                .setPlayer(new ProgrammableExecutor<>() {
+                    @Override
+                    public @Nullable CommandStatus onUser(@NotNull PlayerUser user, @NotNull CommandArguments arguments) {
+                        new MenuInventory().open(user.getPlayer());
+                        return new CommandStatus();
+                    }
+                })
+        );
+        this.addCommand(new ProgrammableCommand("invites")
+                .setDescription("Used to open the game invites menu.")
+                .setSyntax("/invites")
+                .setPlayer(new ProgrammableExecutor<>() {
+                    @Override
+                    public @Nullable CommandStatus onUser(@NotNull PlayerUser user, @NotNull CommandArguments arguments) {
+                        new InviteListInventory().open(user.getPlayer());
+                        return new CommandStatus();
+                    }
+                })
+        );
     }
 
     @Override
     public @NotNull MineManiaUser getUser(@NotNull UUID uuid) {
-        return new MineManiaUser(uuid, Bukkit.getPlayer(uuid).getName());
+        UserRecord record = this.getAPI().getDatabase()
+                .getTable(UserCollection.class)
+                .getFirstRecord(new Query().match("mc_uuid", uuid.toString()));
+
+        if (record == null) {
+            return new MineManiaUser(uuid, Bukkit.getOfflinePlayer(uuid).getName());
+        }
+
+        return new MineManiaUser(uuid, record.getMinecraftName());
     }
 
     @Override
     public @NotNull MineManiaUser getUser(@NotNull String name) {
-        return new MineManiaUser(Bukkit.getPlayer(name).getUniqueId(), name);
+        UserRecord record = this.getAPI().getDatabase()
+                .getTable(UserCollection.class)
+                .getFirstRecord(new Query().match("mc_name", name));
+
+
+        if (record == null) {
+            return new MineManiaUser(Bukkit.getOfflinePlayer(name).getUniqueId(), name);
+        }
+
+        return new MineManiaUser(record.getMinecraftUuid(), name);
     }
 
     @Override
@@ -123,6 +178,31 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
     }
 
     @Override
+    public @Nullable UserActionTeleportEvent onTeleport(@NotNull UserActionTeleportEvent event) {
+
+        // Check if the user is teleporting to this server.
+        if (!event.getLocation().getServerName().equalsIgnoreCase(this.getAPI().getServerName())) return null;
+
+        // Check if the specific world location doesnt matter.
+        if (event.getLocation().getWorldName().equalsIgnoreCase("null")) {
+            return (UserActionTeleportEvent) event.setComplete(true);
+        }
+
+        // Attempt to get the user as an online player.
+        Optional<Player> optionalPlayer = this.getPlayer(event.getUser());
+
+        // Check if the player is already online.
+        if (optionalPlayer.isPresent()) {
+            optionalPlayer.get().teleport(event.getLocation().getLocation(new BukkitLocationConverter()));
+            return (UserActionTeleportEvent) event.setComplete(true);
+        }
+
+        // Otherwise, add to a teleport list.
+        this.teleportMap.put(event.getUser().getUniqueId(), event.getLocation());
+        return (UserActionTeleportEvent) event.setComplete(true);
+    }
+
+    @Override
     public @NotNull PlayerChatEvent onChatEvent(@NotNull PlayerChatEvent event) {
 
         // Check if this server should not send the message.
@@ -137,6 +217,19 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
         new ConsoleUser().sendMessage(event.getFormattedMessage());
 
         return (PlayerChatEvent) event.complete();
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+
+        // Check if they are in the teleport map.
+        if (!teleportMap.containsKey(event.getPlayer().getUniqueId())) return;
+
+        // Get the instance of the location to teleport to.
+        MineManiaLocation location = this.teleportMap.get(event.getPlayer().getUniqueId());
+
+        // Teleport the player.
+        event.getPlayer().teleport(location.getLocation(new BukkitLocationConverter()));
     }
 
     /**
@@ -178,6 +271,34 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
             if (meta.asBoolean()) return true;
         }
         return false;
+    }
+
+    /**
+     * Used to get the instance of the online player
+     * from a mine mania user.
+     *
+     * @param user The instance of the user.
+     * @return The optional player instance.
+     */
+    public @NotNull Optional<Player> getPlayer(@NotNull MineManiaUser user) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getUniqueId().equals(user.getUniqueId())) return Optional.of(player);
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Used to get a player's paws.
+     *
+     * @param playerUuid The player's uuid.
+     * @return The number of paws they have.
+     */
+    public long getPaws(@NotNull UUID playerUuid) {
+        return this.getAPI().getDatabase()
+                .getTable(UserCollection.class)
+                .getUserRecord(playerUuid)
+                .orElse(new UserRecord())
+                .getPaws();
     }
 
     /**
