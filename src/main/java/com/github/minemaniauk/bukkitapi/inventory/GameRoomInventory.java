@@ -240,6 +240,8 @@ public class GameRoomInventory extends CozyInventory {
             return;
         }
 
+        player.sendMessage("&7&l> &7Found empty arena.");
+
         // Set game room identifier before other rooms take the arena.
         arena.setGameRoomIdentifier(record.getUuid());
         arena.save();
