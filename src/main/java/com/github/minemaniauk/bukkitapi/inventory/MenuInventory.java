@@ -27,6 +27,7 @@ import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.api.MineManiaLocation;
 import com.github.minemaniauk.api.database.collection.GameRoomCollection;
 import com.github.minemaniauk.api.database.record.GameRoomRecord;
+import com.github.minemaniauk.api.game.Arena;
 import com.github.minemaniauk.api.user.MineManiaUser;
 import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
 import org.bukkit.Material;
@@ -84,14 +85,24 @@ public class MenuInventory extends CozyInventory {
                             .getGameRoomFromPlayer(user.getUuid())
                             .orElse(null);
 
-                    // Check if they are in a game room.
-                    if (record != null) {
+                    if (record == null) {
+                        // Otherwise, open the game inventory.
+                        new GameInventory().open(user.getPlayer());
+                        return;
+                    }
+
+                    // Check if the game room is in a game.
+                    final Arena arena = MineManiaAPI_Bukkit.getInstance().getAPI()
+                            .getGameManager()
+                            .getArena(record.getUuid())
+                            .orElse(null);
+
+                    if (arena == null) {
                         new GameRoomInventory(record.getUuid()).open(user.getPlayer());
                         return;
                     }
 
-                    // Otherwise, open the game inventory.
-                    new GameInventory().open(user.getPlayer());
+                    new JoinGameInventory(record.getUuid()).open(user.getPlayer());
                 })
         );
 
