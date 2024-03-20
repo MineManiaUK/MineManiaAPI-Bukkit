@@ -32,8 +32,6 @@ import com.github.minemaniauk.bukkitapi.BukkitMaterialConverter;
 import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
 import com.github.smuddgge.squishydatabase.Query;
 import org.bukkit.Material;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

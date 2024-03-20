@@ -202,7 +202,7 @@ public class GameRoomInventory extends CozyInventory {
                             "&e&lAvailable Arenas"
                     )
                     .addAction((ClickAction) (user, type, inventory) -> {
-                        this.startGame(record, user);
+                        new GameRoomMapSelector(this.gameRoomIdentifier).open(user.getPlayer());
                     })
                     .addSlot(48, 49);
 
@@ -215,39 +215,6 @@ public class GameRoomInventory extends CozyInventory {
 
             this.setItem(item);
         }
-    }
-
-    /**
-     * Called when the start game button is pressed.
-     *
-     * @param record The instance of the game record.
-     * @param player The instance of the player that clicked.
-     */
-    private void startGame(@NotNull GameRoomRecord record, @NotNull PlayerUser player) {
-
-        // Message the owner.
-        player.sendMessage("&7&l> &7Searching for an arena...");
-
-        // Check if there is an available arena.
-        Arena arena = MineManiaAPI_Bukkit.getInstance().getAPI()
-                .getGameManager()
-                .getFirstAvailableArena(record.getGameType(), record.getPlayerUuids().size())
-                .orElse(null);
-
-        // Check if it returned an arena.
-        if (arena == null) {
-            player.sendMessage("&c&l> &cThere are currently no available arenas.");
-            return;
-        }
-
-        player.sendMessage("&7&l> &7Found empty arena.");
-
-        // Set game room identifier before other rooms take the arena.
-        arena.setGameRoomIdentifier(record.getUuid());
-        arena.save();
-
-        // Start the game.
-        arena.activate();
     }
 
     /**
