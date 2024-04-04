@@ -28,6 +28,7 @@ import com.github.cozyplugins.cozylibrary.command.datatype.CommandStatus;
 import com.github.cozyplugins.cozylibrary.user.ConsoleUser;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.cozyplugins.cozylibrary.user.User;
+import com.github.kerbity.kerb.task.TaskContainer;
 import com.github.minemaniauk.api.MineManiaAPI;
 import com.github.minemaniauk.api.MineManiaAPIContract;
 import com.github.minemaniauk.api.MineManiaLocation;
@@ -229,7 +230,8 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
         MineManiaLocation location = this.teleportMap.get(event.getPlayer().getUniqueId());
 
         // Teleport the player.
-        event.getPlayer().teleport(location.getLocation(new BukkitLocationConverter()));
+        PlayerUser user = new PlayerUser(event.getPlayer());
+        user.forceTeleport(location.getLocation(new BukkitLocationConverter()));
     }
 
     /**

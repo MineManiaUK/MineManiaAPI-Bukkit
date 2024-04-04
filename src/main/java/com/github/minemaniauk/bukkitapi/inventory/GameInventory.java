@@ -56,14 +56,8 @@ public class GameInventory extends CozyInventory {
     protected void onGenerate(PlayerUser player) {
         this.resetInventory();
 
-        // Spleef button.
-        this.setItem(new InventoryItem()
-                .setMaterial(Material.PINK_STAINED_GLASS_PANE)
-                .setCustomModelData(1)
-                .setName("&7&lSpleef")
-                .setLore("&eComing soon...")
-                .addSlot(0, 1, 9, 10)
-        );
+        // Tnt run button.
+        this.setGameItem(GameType.TNT_RUN, List.of(0, 1, 9, 10));
 
         // Hide and seek button.
         this.setItem(new InventoryItem()
@@ -74,26 +68,8 @@ public class GameInventory extends CozyInventory {
                 .addSlot(2, 3, 11, 12)
         );
 
-        // Tower defence button.
-        this.setItem(new InventoryItem()
-                .setMaterial(Material.PINK_STAINED_GLASS_PANE)
-                .setCustomModelData(1)
-                .setName("&7&lTower Defence")
-                .setLore("&eComing soon...")
-                .addSlot(4, 5, 13, 14)
-        );
-
         // Tnt run button.
-        this.setGameItem(GameType.TNT_RUN, List.of(6, 7, 15, 16));
-
-        // More button.
-        this.setItem(new InventoryItem()
-                .setMaterial(Material.PINK_STAINED_GLASS_PANE)
-                .setCustomModelData(1)
-                .setName("&7&lMore Games")
-                .setLore("&eComing soon...")
-                .addSlot(3, 17, 17)
-        );
+        this.setGameItem(GameType.BED_WARS, List.of(4, 5, 13, 14));
 
         // Back button.
         this.setItem(new InventoryItem()

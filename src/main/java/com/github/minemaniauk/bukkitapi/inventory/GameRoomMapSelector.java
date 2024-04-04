@@ -170,12 +170,13 @@ public class GameRoomMapSelector extends CozyInventory {
                                         "&f&l" + arena.getGameType().getTitle()
                                 ),
                         arena.getIdentifier(),
-                        slotIterator.next()
+                        slotIterator.next(),
+                        record
                 );
                 continue;
             }
 
-            this.setArena(new CozyItem().convert(arena.getDisplayItemSection()), arena.getIdentifier(), slotIterator.next());
+            this.setArena(new CozyItem().convert(arena.getDisplayItemSection()), arena.getIdentifier(), slotIterator.next(), record);
         }
     }
 
@@ -186,7 +187,7 @@ public class GameRoomMapSelector extends CozyInventory {
      * @param arenaIdentifier The instance of the identifier.
      * @param slot The slot to put the arena in.
      */
-    public void setArena(@NotNull CozyItem item, @NotNull UUID arenaIdentifier, int slot) {
+    public void setArena(@NotNull CozyItem item, @NotNull UUID arenaIdentifier, int slot, @NotNull GameRoomRecord gameRoom) {
         this.setItem(new InventoryItem(item.create())
                 .addAction((ClickAction) (user, type, inventory) -> {
 
@@ -209,6 +210,20 @@ public class GameRoomMapSelector extends CozyInventory {
                     // Check if it returned an arena.
                     if (arena.isActivated()) {
                         user.sendMessage("&c&l> &cThis arena has recently been activated by another game room.");
+                        this.onGenerate(user);
+                        return;
+                    }
+
+                    // Check if the room has to little players.
+                    if (gameRoom.getPlayerUuids().size() < arena.getMinPlayers()) {
+                        user.sendMessage("&7&l> &7You need more players to play in this arena.");
+                        this.onGenerate(user);
+                        return;
+                    }
+
+                    // Check if the room has to many players.
+                    if (gameRoom.getPlayerUuids().size() > arena.getMaxPlayers()) {
+                        user.sendMessage("&7&l> &7There are too many players in your game room to play in this arena.");
                         this.onGenerate(user);
                         return;
                     }
