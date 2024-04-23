@@ -31,98 +31,65 @@ import com.github.minemaniauk.api.game.Arena;
 import com.github.minemaniauk.api.user.MineManiaUser;
 import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-/**
- * Represents the main menu inventory.
- * You can create a new instance of this and use the
- * {@link CozyInventory#open(Player)} method to open the
- * inventory for a player.
- */
-public class MenuInventory extends CozyInventory {
+public class MenuInventoryPage2 extends CozyInventory {
 
     /**
      * Used to create a new instance of the menu.
      */
-    public MenuInventory() {
-        super(54, "&f₴₴₴₴₴₴₴₴☀");
+    public MenuInventoryPage2() {
+        super(54, "&f₴₴₴₴₴₴₴₴✣");
     }
 
     @Override
     protected void onGenerate(PlayerUser openUser) {
 
-        // SMP button.
+        // Creative.
         this.setTeleportItem(
-                "smp",
-                "&a&lSMP",
-                List.of("&7Click to teleport to the public smp."),
-                List.of(0, 1, 9, 10)
+                "creative",
+                "&a&lCreative",
+                List.of("&7Click to teleport to the creative world."),
+                List.of(1, 2, 10, 11)
         );
 
-        // World of calm button.
+        // Sky block.
         this.setTeleportItem(
-                "worldofcalm",
-                "&b&lWorld of Calm",
-                List.of("&7Click to teleport to the world of calm."),
-                List.of(2, 3, 11, 12)
-        );
-
-        // Games button.
-        this.setItem(new InventoryItem()
-                .setMaterial(Material.PINK_STAINED_GLASS_PANE)
-                .setCustomModelData(1)
-                .setName("&d&lGames")
-                .setLore("&7Click to view the games and the game rooms.")
-                .addSlot(4, 5, 13, 14)
-                .addAction((ClickAction) (user, type, inventory) -> {
-
-                    // Check if the user is in a game room.
-                    final GameRoomRecord record = MineManiaAPI_Bukkit.getInstance().getAPI().getDatabase()
-                            .getTable(GameRoomCollection.class)
-                            .getGameRoomFromPlayer(user.getUuid())
-                            .orElse(null);
-
-                    if (record == null) {
-                        // Otherwise, open the game inventory.
-                        new GameInventory().open(user.getPlayer());
-                        return;
-                    }
-
-                    // Check if the game room is in a game.
-                    final Arena arena = MineManiaAPI_Bukkit.getInstance().getAPI()
-                            .getGameManager()
-                            .getArena(record.getUuid())
-                            .orElse(null);
-
-                    if (arena == null) {
-                        new GameRoomInventory(record.getUuid()).open(user.getPlayer());
-                        return;
-                    }
-
-                    new JoinGameInventory(record.getUuid()).open(user.getPlayer());
-                })
+                "skyblock",
+                "&b&lSky Block",
+                List.of("&7Click to teleport to the sky block server."),
+                List.of(3, 4, 12, 13)
         );
 
         // Battlegrounds button.
         this.setTeleportItem(
-                "battlegroundssmp",
-                "&c&lBattle Grounds",
-                List.of("&7Click to teleport to the battle grounds world."),
-                List.of(6, 7, 15, 16)
+                "craftyland",
+                "&d&lCrafty Land",
+                List.of("&7Click to teleport to crafty land."),
+                List.of(5, 6, 14, 15)
         );
 
         // Other button.
         this.setItem(new InventoryItem()
                 .setMaterial(Material.PINK_STAINED_GLASS_PANE)
                 .setCustomModelData(1)
-                .setName("&a&lMore")
-                .addSlot(8, 17)
+                .setName("&a&lBack")
+                .addSlot(0, 9)
                 .addAction((ClickAction) (user, type, inventory) -> {
-                    new MenuInventoryPage2().open(user.getPlayer());
+                    new MenuInventory().open(user.getPlayer());
                 })
+        );
+
+        // Battlegrounds button.
+        this.setTeleportItem(
+                "dungeons",
+                "&c&lDungeons",
+                List.of("&7Click to teleport to the dungeons."),
+                List.of(7, 8, 16, 17)
         );
 
         // Profile button.

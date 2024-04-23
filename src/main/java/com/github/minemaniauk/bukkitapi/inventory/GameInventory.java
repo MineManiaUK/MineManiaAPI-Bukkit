@@ -134,6 +134,16 @@ public class GameInventory extends CozyInventory {
                 .addSlotList(slots)
                 .addAction((ClickAction) (user, type, inventory) -> {
 
+                    if (gameType.equals(GameType.TNT_RUN) && !user.hasPermission("game.tntrun")) {
+                        user.sendMessage("&e&l> &eThis game is in development.");
+                        return;
+                    }
+
+                    if (gameType.equals(GameType.BED_WARS) && !user.hasPermission("game.bedwars")) {
+                        user.sendMessage("&e&l> &eThis game is in development.");
+                        return;
+                    }
+
                     // Create a new game room record.
                     GameRoomRecord record = new GameRoomRecord(user.getUuid(), gameType);
                     record.setPrivate(true);
