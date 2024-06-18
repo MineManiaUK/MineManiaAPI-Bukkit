@@ -20,7 +20,9 @@
 
 package com.github.minemaniauk.bukkitapi.listener;
 
+import com.github.cozyplugins.cozylibrary.MessageManager;
 import com.github.kerbity.kerb.result.CompletableResultSet;
+import com.github.kerbity.kerb.result.ResultSet;
 import com.github.minemaniauk.api.MineManiaAPI;
 import com.github.minemaniauk.api.format.ChatFormat;
 import com.github.minemaniauk.api.kerb.event.player.PlayerChatEvent;
@@ -28,6 +30,7 @@ import com.github.minemaniauk.api.kerb.event.player.PlayerPostChatEvent;
 import com.github.minemaniauk.bukkitapi.BukkitAdapter;
 import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
 import com.github.minemaniauk.bukkitapi.dependency.PlaceholderAPIDependency;
+import com.github.smuddgge.squishyconfiguration.console.Console;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -55,26 +58,31 @@ public class PlayerChatListener implements Listener {
             event.setCancelled(true);
         }
 
+        Console.log("Calling player post chat event.");
+
         // Call the post-chat event.
-        CompletableResultSet<PlayerPostChatEvent> completableResultSet = MineManiaAPI_Bukkit
-                .getInstance()
-                .getAPI()
+        CompletableResultSet<PlayerPostChatEvent> completableResultSet = MineManiaAPI_Bukkit.getInstance().getAPI()
                 .callEvent(new PlayerPostChatEvent(
                         BukkitAdapter.getUser(event.getPlayer()),
                         event.getMessage()
                 ));
 
         // Wait for the final result set.
-        List<PlayerPostChatEvent> resultSet = completableResultSet.waitForFinalResult();
+        ResultSet<PlayerPostChatEvent> resultSet = completableResultSet.waitForComplete();
 
         // Check if the event was cancelled.
-        if (completableResultSet.containsCancelled()) return;
+        if (resultSet.containsCancelled()) {
+            Console.log("Chat event was cancelled");
+            return;
+        }
+
+        Console.log("Chat event was approved");
 
         // The final chat format.
         ChatFormat chatFormat = new ChatFormat();
         List<String> serverWhiteList = new ArrayList<>();
 
-        for (PlayerPostChatEvent postChatEvent : resultSet) {
+        for (PlayerPostChatEvent postChatEvent : resultSet.get()) {
             if (postChatEvent == null) continue;
             chatFormat.combine(postChatEvent.getChatFormat());
             serverWhiteList.addAll(postChatEvent.getServerWhitelist());
@@ -89,5 +97,7 @@ public class PlayerChatListener implements Listener {
                 ),
                 serverWhiteList
         ));
+
+        Console.log("Calling player chat event.");
     }
 }

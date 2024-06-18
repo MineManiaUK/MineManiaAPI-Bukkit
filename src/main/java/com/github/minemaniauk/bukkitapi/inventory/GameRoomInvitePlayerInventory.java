@@ -32,7 +32,6 @@ import com.github.minemaniauk.api.user.MineManiaUser;
 import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -70,6 +69,12 @@ public class GameRoomInvitePlayerInventory extends CozyInventory {
                 .getDatabase()
                 .getTable(UserCollection.class)
                 .getRecordList()) {
+
+            try {
+                Bukkit.getOfflinePlayer(userRecord.getMinecraftUuid());
+            } catch (Exception exception) {
+                continue;
+            }
 
             slot++;
             if (slot > 44) continue;

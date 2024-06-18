@@ -40,10 +40,10 @@ import com.github.minemaniauk.bukkitapi.inventory.InviteListInventory;
 import com.github.minemaniauk.bukkitapi.inventory.MenuInventory;
 import com.github.minemaniauk.bukkitapi.listener.PlayerChatListener;
 import com.github.smuddgge.squishyconfiguration.ConfigurationFactory;
+import com.github.smuddgge.squishyconfiguration.console.Console;
 import com.github.smuddgge.squishyconfiguration.interfaces.Configuration;
 import com.github.smuddgge.squishydatabase.Query;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -52,7 +52,10 @@ import org.bukkit.metadata.MetadataValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Represents the instance of the
@@ -206,9 +209,16 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
     @Override
     public @NotNull PlayerChatEvent onChatEvent(@NotNull PlayerChatEvent event) {
 
-        // Check if this server should not send the message.
-        if (!event.getServerWhiteList().contains(this.getClientName())) return event;
+        Console.log("Received chat event.");
 
+        // Check if this server should not send the message.
+        if (!event.getServerWhiteList().contains(this.getClientName())) {
+            Console.log("This server was not specified to be part of the chat channel.");
+            return event;
+        }
+
+        Console.log("Sending the message to all players.");
+        Console.log("Message: " + event.getFormattedMessage());
 
         // Send all the players online the message.
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -222,6 +232,27 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+
+        // Check if they are in the database.
+        UserRecord record = this.getAPI().getDatabase()
+                .getTable(UserCollection.class)
+                .getUserRecord(event.getPlayer().getUniqueId())
+                .orElse(null);
+
+        if (record == null) {
+            UserRecord userRecord = new UserRecord();
+            userRecord.mc_name = event.getPlayer().getName();
+            userRecord.mc_uuid = event.getPlayer().getUniqueId().toString();
+
+            this.getAPI().getDatabase()
+                    .getTable(UserCollection.class)
+                    .insertRecord(userRecord);
+        } else {
+            record.mc_name = event.getPlayer().getName();
+            this.getAPI().getDatabase()
+                    .getTable(UserCollection.class)
+                    .insertRecord(record);
+        }
 
         // Check if they are in the teleport map.
         if (!teleportMap.containsKey(event.getPlayer().getUniqueId())) return;
