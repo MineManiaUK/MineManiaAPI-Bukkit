@@ -24,16 +24,20 @@ import com.github.cozyplugins.cozylibrary.inventory.CozyInventory;
 import com.github.cozyplugins.cozylibrary.inventory.InventoryItem;
 import com.github.cozyplugins.cozylibrary.inventory.action.action.ClickAction;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
+import com.github.kerbity.kerb.result.CompletableResultSet;
 import com.github.minemaniauk.api.database.collection.GameRoomCollection;
 import com.github.minemaniauk.api.database.collection.UserCollection;
 import com.github.minemaniauk.api.database.record.GameRoomRecord;
 import com.github.minemaniauk.api.database.record.UserRecord;
+import com.github.minemaniauk.api.kerb.event.GetOnlinePlayersRequest;
 import com.github.minemaniauk.api.user.MineManiaUser;
 import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -63,29 +67,44 @@ public class GameRoomInvitePlayerInventory extends CozyInventory {
     protected void onGenerate(PlayerUser player) {
         this.resetInventory();
 
+        new Thread(() -> {
+
+            CompletableResultSet<GetOnlinePlayersRequest> resultSet = MineManiaAPI_Bukkit.getInstance()
+                    .getAPI()
+                    .callEvent(new GetOnlinePlayersRequest());
+
+            for (GetOnlinePlayersRequest result : resultSet.waitForFinalResult()) {
+                if (result.getPlayerUuids().isEmpty()) continue;
+                this.loadPlayers(result.getPlayerUuids());
+            }
+
+        }).start();
+    }
+
+    public void loadPlayers(@NotNull List<UUID> uuidList) {
+
         // Add all database players.
         int slot = -1;
-        for (UserRecord userRecord : MineManiaAPI_Bukkit.getInstance().getAPI()
-                .getDatabase()
-                .getTable(UserCollection.class)
-                .getRecordList()) {
+        for (UUID uuid :uuidList) {
 
+            OfflinePlayer offlinePlayer = null;
             try {
-                Bukkit.getOfflinePlayer(userRecord.getMinecraftUuid());
+                offlinePlayer = Bukkit.getOfflinePlayer(uuid);
             } catch (Exception exception) {
                 continue;
             }
+            final OfflinePlayer player = offlinePlayer;
 
             slot++;
             if (slot > 44) continue;
 
             // Check if the player has already been invited.
             if (MineManiaAPI_Bukkit.getInstance().getAPI().getGameManager()
-                    .hasBeenInvited(userRecord.getMinecraftUuid(), this.gameRoomIdentifier)) {
+                    .hasBeenInvited(uuid, this.gameRoomIdentifier)) {
 
                 this.setItem(new InventoryItem()
                         .setMaterial(Material.BLACK_STAINED_GLASS_PANE)
-                        .setName("&f&l" + userRecord.getMinecraftName() + " &a&lHas Been Invited")
+                        .setName("&f&l" + player.getName() + " &a&lHas Been Invited")
                         .addSlot(slot)
                 );
                 continue;
@@ -94,8 +113,8 @@ public class GameRoomInvitePlayerInventory extends CozyInventory {
             // Set the player's item.
             this.setItem(new InventoryItem()
                     .setMaterial(Material.PLAYER_HEAD)
-                    .setSkull(userRecord.getMinecraftUuid())
-                    .setName("&6&lInvite &f&l" + userRecord.getMinecraftName())
+                    .setSkull(uuid)
+                    .setName("&6&lInvite &f&l" + player.getName())
                     .setLore("&7Click to send a invite to this player.")
                     .addSlot(slot)
                     .addAction((ClickAction) (user, type, inventory) -> {
@@ -113,13 +132,13 @@ public class GameRoomInvitePlayerInventory extends CozyInventory {
                         }
 
                         MineManiaAPI_Bukkit.getInstance().getAPI().getGameManager()
-                                .sendInvite(userRecord.getMinecraftUuid(), record);
+                                .sendInvite(uuid, record);
 
                         // Send the sender a message.
-                        user.sendMessage("&7&l> &7An invite has been sent to &f" + userRecord.getMinecraftName());
+                        user.sendMessage("&7&l> &7An invite has been sent to &f" + player.getName());
 
                         // Send the invited a message.
-                        MineManiaUser invitedUser = new MineManiaUser(userRecord.getMinecraftUuid(), userRecord.getMinecraftName());
+                        MineManiaUser invitedUser = new MineManiaUser(uuid, player.getName());
                         invitedUser.getActions().sendMessage("&7&l> &7You have been invited to play &f" + record.getGameType().getName() + " &7with &f" + record.getOwner().getName() + "&7. Run the command &e/invites &7to accept.");
                         this.onGenerate(user);
                     })
