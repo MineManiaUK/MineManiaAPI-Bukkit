@@ -87,7 +87,6 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
 
         // Set up the api.
         this.api = MineManiaAPI.createAndSet(this.configuration, this);
-        this.api.getKerbClient().setDebugMode(true);
 
         // Set up the teleport list.
         this.teleportMap = new HashMap<>();
