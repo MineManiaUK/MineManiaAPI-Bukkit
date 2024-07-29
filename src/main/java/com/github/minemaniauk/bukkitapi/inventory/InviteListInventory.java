@@ -80,6 +80,21 @@ public class InviteListInventory extends CozyInventory {
                     .getGameRoom(UUID.fromString(record.gameRoomUuid))
                     .orElseThrow();
 
+            if (MineManiaAPI_Bukkit.getInstance().getAPI()
+                    .getGameManager()
+                    .getArena(gameRoomRecord.getUuid())
+                    .isPresent()) {
+
+                this.setItem(new InventoryItem()
+                        .setMaterial(Material.PLAYER_HEAD)
+                        .setSkull(gameRoomRecord.getOwner().getUniqueId())
+                        .setName("&f&lInvite From &6" + gameRoomRecord.getOwner().getName())
+                        .setLore("&eThis player is currently in a game,",
+                                "&eplease check back when the game has finished.")
+                );
+                return;
+            }
+
             // Set the item.
             this.setItem(new InventoryItem()
                     .setMaterial(Material.PLAYER_HEAD)
