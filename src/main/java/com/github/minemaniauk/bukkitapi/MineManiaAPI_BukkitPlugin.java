@@ -41,10 +41,10 @@ import com.github.minemaniauk.api.user.MineManiaUser;
 import com.github.minemaniauk.bukkitapi.inventory.InviteListInventory;
 import com.github.minemaniauk.bukkitapi.inventory.MenuInventory;
 import com.github.minemaniauk.bukkitapi.listener.PlayerChatListener;
-import com.github.smuddgge.squishyconfiguration.ConfigurationFactory;
-import com.github.smuddgge.squishyconfiguration.console.Console;
-import com.github.smuddgge.squishyconfiguration.interfaces.Configuration;
+import com.github.minemaniauk.developertools.console.Console;
 import com.github.smuddgge.squishydatabase.Query;
+import com.github.squishylib.configuration.Configuration;
+import com.github.squishylib.configuration.ConfigurationFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -88,8 +88,8 @@ public final class MineManiaAPI_BukkitPlugin extends CozyPlugin implements MineM
 
         // Set up the configuration file.
         this.configuration = ConfigurationFactory.YAML
-                .create(this.getPlugin().getDataFolder(), "config")
-                .setDefaultPath("config.yml");
+                .create(this.getPlugin().getDataFolder(), "config");
+        this.configuration.setResourcePath("config.yml");
         this.configuration.load();
 
         // Set up the api.
@@ -230,16 +230,11 @@ public final class MineManiaAPI_BukkitPlugin extends CozyPlugin implements MineM
     @Override
     public @NotNull PlayerChatEvent onChatEvent(@NotNull PlayerChatEvent event) {
 
-        Console.log("Received chat event.");
-
         // Check if this server should not send the message.
         if (!event.getServerWhiteList().contains(this.getClientName())) {
             Console.log("This server was not specified to be part of the chat channel.");
             return event;
         }
-
-        Console.log("Sending the message to all players.");
-        Console.log("Message: " + event.getFormattedMessage());
 
         // Send all the players online the message.
         for (Player player : Bukkit.getOnlinePlayers()) {

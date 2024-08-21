@@ -32,8 +32,8 @@ import com.github.minemaniauk.api.database.record.GameRoomRecord;
 import com.github.minemaniauk.api.game.Arena;
 import com.github.minemaniauk.bukkitapi.BukkitMaterialConverter;
 import com.github.minemaniauk.bukkitapi.MineManiaAPI_BukkitPlugin;
-import com.github.smuddgge.squishyconfiguration.interfaces.ConfigurationSection;
 import com.github.smuddgge.squishydatabase.Query;
+import com.github.squishylib.configuration.ConfigurationSection;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
