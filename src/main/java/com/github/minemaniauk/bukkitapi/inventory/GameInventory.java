@@ -29,7 +29,7 @@ import com.github.minemaniauk.api.database.record.GameRoomRecord;
 import com.github.minemaniauk.api.game.GameType;
 import com.github.minemaniauk.api.user.MineManiaUser;
 import com.github.minemaniauk.bukkitapi.BukkitMaterialConverter;
-import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
+import com.github.minemaniauk.bukkitapi.MineManiaAPI_BukkitPlugin;
 import com.github.smuddgge.squishydatabase.Query;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
@@ -111,7 +111,7 @@ public class GameInventory extends CozyInventory {
                 .setCustomModelData(1)
                 .setName("&d&lProfile")
                 .setLore("&7",
-                        "&7Paws &f" + MineManiaAPI_Bukkit.getInstance().getPaws(player.getUuid()))
+                        "&7Paws &f" + MineManiaAPI_BukkitPlugin.getInstance().getPaws(player.getUuid()))
                 .addSlot(51, 52, 53)
         );
 
@@ -163,11 +163,11 @@ public class GameInventory extends CozyInventory {
     private void setGameRooms(@NotNull PlayerUser player) {
 
         // Get public rooms not in an arena.
-        List<GameRoomRecord> roomRecordList = MineManiaAPI_Bukkit.getInstance()
+        List<GameRoomRecord> roomRecordList = MineManiaAPI_BukkitPlugin.getInstance()
                 .getAPI().getDatabase()
                 .getTable(GameRoomCollection.class)
                 .getRecordList(new Query().match("is_private", false))
-                .stream().filter(gameRoom -> MineManiaAPI_Bukkit.getInstance().getAPI()
+                .stream().filter(gameRoom -> MineManiaAPI_BukkitPlugin.getInstance().getAPI()
                         .getGameManager()
                         .getArena(gameRoom.getUuid())
                         .isEmpty()

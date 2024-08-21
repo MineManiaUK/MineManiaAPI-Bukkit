@@ -29,7 +29,7 @@ import com.github.minemaniauk.api.database.collection.GameRoomCollection;
 import com.github.minemaniauk.api.database.record.GameRoomRecord;
 import com.github.minemaniauk.api.game.Arena;
 import com.github.minemaniauk.api.user.MineManiaUser;
-import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
+import com.github.minemaniauk.bukkitapi.MineManiaAPI_BukkitPlugin;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -80,7 +80,7 @@ public class MenuInventory extends CozyInventory {
                 .addAction((ClickAction) (user, type, inventory) -> {
 
                     // Check if the user is in a game room.
-                    final GameRoomRecord record = MineManiaAPI_Bukkit.getInstance().getAPI().getDatabase()
+                    final GameRoomRecord record = MineManiaAPI_BukkitPlugin.getInstance().getAPI().getDatabase()
                             .getTable(GameRoomCollection.class)
                             .getGameRoomFromPlayer(user.getUuid())
                             .orElse(null);
@@ -92,7 +92,7 @@ public class MenuInventory extends CozyInventory {
                     }
 
                     // Check if the game room is in a game.
-                    final Arena arena = MineManiaAPI_Bukkit.getInstance().getAPI()
+                    final Arena arena = MineManiaAPI_BukkitPlugin.getInstance().getAPI()
                             .getGameManager()
                             .getArena(record.getUuid())
                             .orElse(null);
@@ -131,7 +131,7 @@ public class MenuInventory extends CozyInventory {
                 .setCustomModelData(1)
                 .setName("&d&lProfile")
                 .setLore("&7",
-                        "&7Paws &f" + MineManiaAPI_Bukkit.getInstance().getPaws(openUser.getUuid()))
+                        "&7Paws &f" + MineManiaAPI_BukkitPlugin.getInstance().getPaws(openUser.getUuid()))
                 .addSlot(23, 24, 25, 26,
                         32, 33, 34, 35,
                         41, 42, 43, 44,
@@ -155,7 +155,7 @@ public class MenuInventory extends CozyInventory {
                 .setLore(lore)
                 .addSlotList(slots)
                 .addAction((ClickAction) (user, type, inventory) -> {
-                    MineManiaUser mineManiaUser = MineManiaAPI_Bukkit.getInstance().getUser(user.getUuid());
+                    MineManiaUser mineManiaUser = MineManiaAPI_BukkitPlugin.getInstance().getUser(user.getUuid());
                     MineManiaLocation location = new MineManiaLocation(serverName, "null", 0, 0, 0);
 
                     // Teleport the player.

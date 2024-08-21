@@ -31,7 +31,7 @@ import com.github.minemaniauk.api.database.record.ArenaRecord;
 import com.github.minemaniauk.api.database.record.GameRoomRecord;
 import com.github.minemaniauk.api.game.Arena;
 import com.github.minemaniauk.bukkitapi.BukkitMaterialConverter;
-import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
+import com.github.minemaniauk.bukkitapi.MineManiaAPI_BukkitPlugin;
 import com.github.smuddgge.squishyconfiguration.interfaces.ConfigurationSection;
 import com.github.smuddgge.squishydatabase.Query;
 import org.bukkit.Material;
@@ -67,7 +67,7 @@ public class GameRoomMapSelector extends CozyInventory {
         this.resetInventory();
 
         // Get the instance of teh game room record.
-        final GameRoomRecord record = MineManiaAPI_Bukkit.getInstance().getAPI().getDatabase()
+        final GameRoomRecord record = MineManiaAPI_BukkitPlugin.getInstance().getAPI().getDatabase()
                 .getTable(GameRoomCollection.class)
                 .getGameRoom(this.gameRoomIdentifier).orElse(null);
 
@@ -138,7 +138,7 @@ public class GameRoomMapSelector extends CozyInventory {
         int arenaIndex = -1;
 
         // Loop though arenas.
-        for (Arena arena : MineManiaAPI_Bukkit.getInstance().getAPI()
+        for (Arena arena : MineManiaAPI_BukkitPlugin.getInstance().getAPI()
                 .getGameManager()
                 .getAvailableArenas(record.getGameType())) {
 
@@ -192,7 +192,7 @@ public class GameRoomMapSelector extends CozyInventory {
                 .addAction((ClickAction) (user, type, inventory) -> {
 
                     // Check if the arena is still available.
-                    final ArenaRecord arenaRecord = MineManiaAPI_Bukkit.getInstance().getAPI()
+                    final ArenaRecord arenaRecord = MineManiaAPI_BukkitPlugin.getInstance().getAPI()
                             .getDatabase()
                             .getTable(ArenaCollection.class)
                             .getFirstRecord(new Query().match("identifier", arenaIdentifier.toString()));

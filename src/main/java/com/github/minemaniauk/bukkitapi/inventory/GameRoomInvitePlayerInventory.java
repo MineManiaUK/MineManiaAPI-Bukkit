@@ -26,12 +26,10 @@ import com.github.cozyplugins.cozylibrary.inventory.action.action.ClickAction;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.kerbity.kerb.result.CompletableResultSet;
 import com.github.minemaniauk.api.database.collection.GameRoomCollection;
-import com.github.minemaniauk.api.database.collection.UserCollection;
 import com.github.minemaniauk.api.database.record.GameRoomRecord;
-import com.github.minemaniauk.api.database.record.UserRecord;
 import com.github.minemaniauk.api.kerb.event.GetOnlinePlayersRequest;
 import com.github.minemaniauk.api.user.MineManiaUser;
-import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
+import com.github.minemaniauk.bukkitapi.MineManiaAPI_BukkitPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -69,7 +67,7 @@ public class GameRoomInvitePlayerInventory extends CozyInventory {
 
         new Thread(() -> {
 
-            CompletableResultSet<GetOnlinePlayersRequest> resultSet = MineManiaAPI_Bukkit.getInstance()
+            CompletableResultSet<GetOnlinePlayersRequest> resultSet = MineManiaAPI_BukkitPlugin.getInstance()
                     .getAPI()
                     .callEvent(new GetOnlinePlayersRequest());
 
@@ -99,7 +97,7 @@ public class GameRoomInvitePlayerInventory extends CozyInventory {
             if (slot > 44) continue;
 
             // Check if the player has already been invited.
-            if (MineManiaAPI_Bukkit.getInstance().getAPI().getGameManager()
+            if (MineManiaAPI_BukkitPlugin.getInstance().getAPI().getGameManager()
                     .hasBeenInvited(uuid, this.gameRoomIdentifier)) {
 
                 this.setItem(new InventoryItem()
@@ -120,7 +118,7 @@ public class GameRoomInvitePlayerInventory extends CozyInventory {
                     .addAction((ClickAction) (user, type, inventory) -> {
 
                         // Get the game room.
-                        GameRoomRecord record = MineManiaAPI_Bukkit.getInstance().getAPI().getDatabase()
+                        GameRoomRecord record = MineManiaAPI_BukkitPlugin.getInstance().getAPI().getDatabase()
                                 .getTable(GameRoomCollection.class)
                                 .getGameRoom(this.gameRoomIdentifier)
                                 .orElse(null);
@@ -131,7 +129,7 @@ public class GameRoomInvitePlayerInventory extends CozyInventory {
                             return;
                         }
 
-                        MineManiaAPI_Bukkit.getInstance().getAPI().getGameManager()
+                        MineManiaAPI_BukkitPlugin.getInstance().getAPI().getGameManager()
                                 .sendInvite(uuid, record);
 
                         // Send the sender a message.

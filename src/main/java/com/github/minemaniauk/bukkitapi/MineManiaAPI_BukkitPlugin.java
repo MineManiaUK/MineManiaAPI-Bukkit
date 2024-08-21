@@ -21,10 +21,12 @@
 package com.github.minemaniauk.bukkitapi;
 
 import com.github.cozyplugins.cozylibrary.CozyPlugin;
+import com.github.cozyplugins.cozylibrary.command.CommandManager;
 import com.github.cozyplugins.cozylibrary.command.command.command.ProgrammableCommand;
 import com.github.cozyplugins.cozylibrary.command.command.command.programmable.ProgrammableExecutor;
 import com.github.cozyplugins.cozylibrary.command.datatype.CommandArguments;
 import com.github.cozyplugins.cozylibrary.command.datatype.CommandStatus;
+import com.github.cozyplugins.cozylibrary.placeholder.PlaceholderManager;
 import com.github.cozyplugins.cozylibrary.user.ConsoleUser;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.cozyplugins.cozylibrary.user.User;
@@ -49,6 +51,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,27 +64,31 @@ import java.util.UUID;
  * Represents the instance of the
  * mine mania api for bukkit.
  */
-public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAPIContract, Listener {
+public final class MineManiaAPI_BukkitPlugin extends CozyPlugin implements MineManiaAPIContract, Listener {
 
-    private static @NotNull MineManiaAPI_Bukkit instance;
+    private static @NotNull MineManiaAPI_BukkitPlugin instance;
     private @NotNull Configuration configuration;
     private @NotNull MineManiaAPI api;
     private @NotNull Map<UUID, MineManiaLocation> teleportMap;
 
+    public MineManiaAPI_BukkitPlugin(@NotNull JavaPlugin plugin) {
+        super(plugin);
+    }
+
     @Override
-    public boolean enableCommandDirectory() {
+    public boolean isCommandTypesEnabled() {
         return false;
     }
 
     @Override
-    public void onCozyEnable() {
+    public void onEnable() {
 
         // Set the instance.T
-        MineManiaAPI_Bukkit.instance = this;
+        MineManiaAPI_BukkitPlugin.instance = this;
 
         // Set up the configuration file.
         this.configuration = ConfigurationFactory.YAML
-                .create(this.getDataFolder(), "config")
+                .create(this.getPlugin().getDataFolder(), "config")
                 .setDefaultPath("config.yml");
         this.configuration.load();
 
@@ -92,11 +99,19 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
         this.teleportMap = new HashMap<>();
 
         // Register events.
-        this.getServer().getPluginManager().registerEvents(new PlayerChatListener(), this);
-        this.getServer().getPluginManager().registerEvents(this, this);
+        this.getPlugin().getServer().getPluginManager().registerEvents(new PlayerChatListener(), this.getPlugin());
+        this.getPlugin().getServer().getPluginManager().registerEvents(this, this.getPlugin());
+    }
 
-        // Add commands.
-        this.addCommand(new ProgrammableCommand("menu")
+    @Override
+    protected void onDisable() {
+
+    }
+
+    @Override
+    protected void onLoadCommands(@NotNull CommandManager commandManager) {
+
+        commandManager.addCommand(new ProgrammableCommand("menu")
                 .setDescription("Used to open the main menu.")
                 .setSyntax("/menu")
                 .setPlayer(new ProgrammableExecutor<>() {
@@ -107,7 +122,8 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
                     }
                 })
         );
-        this.addCommand(new ProgrammableCommand("invites")
+
+        commandManager.addCommand(new ProgrammableCommand("invites")
                 .setDescription("Used to open the game invites menu.")
                 .setSyntax("/invites")
                 .setPlayer(new ProgrammableExecutor<>() {
@@ -118,6 +134,11 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
                     }
                 })
         );
+    }
+
+    @Override
+    protected void onLoadPlaceholders(@NotNull PlaceholderManager placeholderManager) {
+
     }
 
     @Override
@@ -340,7 +361,7 @@ public final class MineManiaAPI_Bukkit extends CozyPlugin implements MineManiaAP
      *
      * @return The instance of the bukkit api.
      */
-    public static @NotNull MineManiaAPI_Bukkit getInstance() {
-        return MineManiaAPI_Bukkit.instance;
+    public static @NotNull MineManiaAPI_BukkitPlugin getInstance() {
+        return MineManiaAPI_BukkitPlugin.instance;
     }
 }

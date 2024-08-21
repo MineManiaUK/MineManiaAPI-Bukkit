@@ -27,9 +27,8 @@ import com.github.minemaniauk.api.database.collection.GameRoomCollection;
 import com.github.minemaniauk.api.database.record.GameRoomRecord;
 import com.github.minemaniauk.api.game.Arena;
 import com.github.minemaniauk.api.user.MineManiaUser;
-import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
+import com.github.minemaniauk.bukkitapi.MineManiaAPI_BukkitPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -49,7 +48,7 @@ public class JoinGameInventory extends ConfirmationInventory {
                 .setAnvilTitle("&8&lJoin Game")
                 .setConfirm(user -> {
 
-                    final GameRoomRecord gameRoomRecord = MineManiaAPI_Bukkit.getInstance().getAPI().getDatabase()
+                    final GameRoomRecord gameRoomRecord = MineManiaAPI_BukkitPlugin.getInstance().getAPI().getDatabase()
                             .getTable(GameRoomCollection.class)
                             .getGameRoom(gameRoomIdentifier).orElse(null);
 
@@ -59,7 +58,7 @@ public class JoinGameInventory extends ConfirmationInventory {
                         return;
                     }
 
-                    final Arena arena = MineManiaAPI_Bukkit.getInstance().getAPI()
+                    final Arena arena = MineManiaAPI_BukkitPlugin.getInstance().getAPI()
                             .getGameManager()
                             .getArena(gameRoomIdentifier).orElse(null);
 
@@ -78,7 +77,7 @@ public class JoinGameInventory extends ConfirmationInventory {
                 })
                 .setAbort(user -> {
 
-                    final GameRoomRecord gameRoomRecord = MineManiaAPI_Bukkit.getInstance().getAPI().getDatabase()
+                    final GameRoomRecord gameRoomRecord = MineManiaAPI_BukkitPlugin.getInstance().getAPI().getDatabase()
                             .getTable(GameRoomCollection.class)
                             .getGameRoom(gameRoomIdentifier).orElse(null);
 
@@ -92,7 +91,7 @@ public class JoinGameInventory extends ConfirmationInventory {
 
                         // Check if they were the only player in that game room.
                         if (gameRoomRecord.getPlayerUuids().size() == 1) {
-                            MineManiaAPI_Bukkit.getInstance().getAPI()
+                            MineManiaAPI_BukkitPlugin.getInstance().getAPI()
                                     .getDatabase()
                                     .getTable(GameRoomCollection.class)
                                     .removeRecord(gameRoomRecord);

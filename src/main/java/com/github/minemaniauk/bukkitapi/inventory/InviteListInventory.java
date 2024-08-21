@@ -29,9 +29,8 @@ import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.api.database.collection.GameRoomCollection;
 import com.github.minemaniauk.api.database.record.GameRoomInviteRecord;
 import com.github.minemaniauk.api.database.record.GameRoomRecord;
-import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
+import com.github.minemaniauk.bukkitapi.MineManiaAPI_BukkitPlugin;
 import org.bukkit.Material;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
@@ -55,7 +54,7 @@ public class InviteListInventory extends CozyInventory {
     protected void onGenerate(PlayerUser player) {
 
         // Get the list of invites for this player.
-        List<GameRoomInviteRecord> recordList = MineManiaAPI_Bukkit.getInstance().getAPI()
+        List<GameRoomInviteRecord> recordList = MineManiaAPI_BukkitPlugin.getInstance().getAPI()
                 .getGameManager()
                 .getInviteList(player.getUuid());
 
@@ -74,13 +73,13 @@ public class InviteListInventory extends CozyInventory {
             if (slot > 53) return;
 
             // Get the instance of the game room.
-            final GameRoomRecord gameRoomRecord = MineManiaAPI_Bukkit.getInstance().getAPI()
+            final GameRoomRecord gameRoomRecord = MineManiaAPI_BukkitPlugin.getInstance().getAPI()
                     .getDatabase()
                     .getTable(GameRoomCollection.class)
                     .getGameRoom(UUID.fromString(record.gameRoomUuid))
                     .orElseThrow();
 
-            if (MineManiaAPI_Bukkit.getInstance().getAPI()
+            if (MineManiaAPI_BukkitPlugin.getInstance().getAPI()
                     .getGameManager()
                     .getArena(gameRoomRecord.getUuid())
                     .isPresent()) {
@@ -111,7 +110,7 @@ public class InviteListInventory extends CozyInventory {
                                     record.remove();
 
                                     // Check if they are already in a game room.
-                                    final GameRoomRecord gameRoomIn = MineManiaAPI_Bukkit.getInstance().getAPI()
+                                    final GameRoomRecord gameRoomIn = MineManiaAPI_BukkitPlugin.getInstance().getAPI()
                                             .getDatabase()
                                             .getTable(GameRoomCollection.class)
                                             .getGameRoomFromPlayer(confirmUser.getUuid())
@@ -120,7 +119,7 @@ public class InviteListInventory extends CozyInventory {
                                     if (gameRoomIn != null) {
                                         if (gameRoomIn.getOwner().getUniqueId().equals(confirmUser.getUuid())) {
                                             confirmUser.sendMessage("&7&l> &7Previous game room has been deleted.");
-                                            MineManiaAPI_Bukkit.getInstance().getAPI()
+                                            MineManiaAPI_BukkitPlugin.getInstance().getAPI()
                                                     .getDatabase()
                                                     .getTable(GameRoomCollection.class)
                                                     .removeRecord(gameRoomIn);
@@ -131,7 +130,7 @@ public class InviteListInventory extends CozyInventory {
                                         }
                                     }
 
-                                    final GameRoomRecord gameRoomRecordNew = MineManiaAPI_Bukkit.getInstance().getAPI()
+                                    final GameRoomRecord gameRoomRecordNew = MineManiaAPI_BukkitPlugin.getInstance().getAPI()
                                             .getDatabase()
                                             .getTable(GameRoomCollection.class)
                                             .getGameRoom(UUID.fromString(record.gameRoomUuid))

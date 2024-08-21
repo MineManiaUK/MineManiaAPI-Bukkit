@@ -69,9 +69,9 @@
 
         <!-- Minecraft Helper Library -->
         <dependency>
-            <groupId>com.github.Cozy-Plugins</groupId>
-            <artifactId>CozyLibrary</artifactId>
-            <version>2.5.3</version>
+            <groupId>com.github.Cozy-Plugins.CozyLibrary</groupId>
+            <artifactId>library</artifactId>
+            <version>5.0.0</version>
         </dependency>
 
         <!-- MineManiaAPI -->

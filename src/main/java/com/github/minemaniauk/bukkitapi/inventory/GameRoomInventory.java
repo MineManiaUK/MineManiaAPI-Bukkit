@@ -26,10 +26,9 @@ import com.github.cozyplugins.cozylibrary.inventory.action.action.ClickAction;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.api.database.collection.GameRoomCollection;
 import com.github.minemaniauk.api.database.record.GameRoomRecord;
-import com.github.minemaniauk.api.game.Arena;
 import com.github.minemaniauk.api.user.MineManiaUser;
 import com.github.minemaniauk.bukkitapi.BukkitMaterialConverter;
-import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
+import com.github.minemaniauk.bukkitapi.MineManiaAPI_BukkitPlugin;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,7 +54,7 @@ public class GameRoomInventory extends CozyInventory {
         this.resetInventory();
 
         // Get the instance of teh game room record.
-        final GameRoomRecord record = MineManiaAPI_Bukkit.getInstance().getAPI().getDatabase()
+        final GameRoomRecord record = MineManiaAPI_BukkitPlugin.getInstance().getAPI().getDatabase()
                 .getTable(GameRoomCollection.class)
                 .getGameRoom(this.gameRoomIdentifier).orElse(null);
 
@@ -112,7 +111,7 @@ public class GameRoomInventory extends CozyInventory {
 
                     // Check if the player is the owner.
                     if (record.getOwner().getUniqueId().equals(user.getUuid())) {
-                        MineManiaAPI_Bukkit.getInstance().getAPI()
+                        MineManiaAPI_BukkitPlugin.getInstance().getAPI()
                                 .getDatabase()
                                 .getTable(GameRoomCollection.class)
                                 .removeRecord(record);
@@ -207,7 +206,7 @@ public class GameRoomInventory extends CozyInventory {
                     .addSlot(48, 49);
 
             // Add the arenas as lore.
-            MineManiaAPI_Bukkit.getInstance().getAPI()
+            MineManiaAPI_BukkitPlugin.getInstance().getAPI()
                     .getGameManager()
                     .getArenaAvailabilityAsLore(record.getGameType())
                     .stream().map(line -> "&7- &f" + line)

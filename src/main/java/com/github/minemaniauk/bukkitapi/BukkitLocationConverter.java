@@ -34,7 +34,7 @@ public class BukkitLocationConverter implements MineManiaLocation.LocationConver
     @Override
     public @NotNull MineManiaLocation getMineManiaLocation(@NotNull Location location) {
         return new MineManiaLocation(
-                MineManiaAPI_Bukkit.getInstance().getAPI().getServerName(),
+                MineManiaAPI_BukkitPlugin.getInstance().getAPI().getServerName(),
                 location.getWorld().getName(),
                 location.getX(),
                 location.getY(),

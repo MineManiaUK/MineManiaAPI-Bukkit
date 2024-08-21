@@ -20,15 +20,13 @@
 
 package com.github.minemaniauk.bukkitapi.listener;
 
-import com.github.cozyplugins.cozylibrary.MessageManager;
 import com.github.kerbity.kerb.result.CompletableResultSet;
 import com.github.kerbity.kerb.result.ResultSet;
-import com.github.minemaniauk.api.MineManiaAPI;
 import com.github.minemaniauk.api.format.ChatFormat;
 import com.github.minemaniauk.api.kerb.event.player.PlayerChatEvent;
 import com.github.minemaniauk.api.kerb.event.player.PlayerPostChatEvent;
 import com.github.minemaniauk.bukkitapi.BukkitAdapter;
-import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
+import com.github.minemaniauk.bukkitapi.MineManiaAPI_BukkitPlugin;
 import com.github.minemaniauk.bukkitapi.dependency.PlaceholderAPIDependency;
 import com.github.smuddgge.squishyconfiguration.console.Console;
 import org.bukkit.event.EventHandler;
@@ -61,7 +59,7 @@ public class PlayerChatListener implements Listener {
         Console.log("Calling player post chat event.");
 
         // Call the post-chat event.
-        CompletableResultSet<PlayerPostChatEvent> completableResultSet = MineManiaAPI_Bukkit.getInstance().getAPI()
+        CompletableResultSet<PlayerPostChatEvent> completableResultSet = MineManiaAPI_BukkitPlugin.getInstance().getAPI()
                 .callEvent(new PlayerPostChatEvent(
                         BukkitAdapter.getUser(event.getPlayer()),
                         event.getMessage()
@@ -89,7 +87,7 @@ public class PlayerChatListener implements Listener {
         }
 
         // Broadcast the final chat event and not expect results.
-        MineManiaAPI_Bukkit.getInstance().getAPI().callEvent(new PlayerChatEvent(
+        MineManiaAPI_BukkitPlugin.getInstance().getAPI().callEvent(new PlayerChatEvent(
                 BukkitAdapter.getUser(event.getPlayer()),
                 PlaceholderAPIDependency.getInstance().parse(
                         chatFormat.parse(event.getMessage()),

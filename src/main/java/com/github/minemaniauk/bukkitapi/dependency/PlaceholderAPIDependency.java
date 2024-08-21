@@ -20,7 +20,7 @@
 
 package com.github.minemaniauk.bukkitapi.dependency;
 
-import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
+import com.github.minemaniauk.bukkitapi.MineManiaAPI_BukkitPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +35,7 @@ public class PlaceholderAPIDependency {
      */
     public static @NotNull PlaceholderAPIHelper getInstance() {
         if (!Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            MineManiaAPI_Bukkit.getInstance().getLogger().warning("Placeholder API is not installed.");
+            MineManiaAPI_BukkitPlugin.getInstance().getPlugin().getLogger().warning("Placeholder API is not installed.");
             return new PlaceholderAPIHelper() {
                 @Override
                 public @NotNull String parse(@NotNull String message, @Nullable Player player) {
