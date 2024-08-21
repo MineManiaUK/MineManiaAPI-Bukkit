@@ -88,7 +88,7 @@ public final class MineManiaAPI_BukkitPlugin extends CozyPlugin implements MineM
 
         // Set up the configuration file.
         this.configuration = ConfigurationFactory.YAML
-                .create(this.getPlugin().getDataFolder(), "config");
+                .create(this.getPlugin().getDataFolder(), "config.yml");
         this.configuration.setResourcePath("config.yml");
         this.configuration.load();
 
