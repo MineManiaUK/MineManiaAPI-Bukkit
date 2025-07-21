@@ -38,10 +38,6 @@
 
     <repositories>
         <repository>
-            <id>spigotmc-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-        </repository>
-        <repository>
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
@@ -80,6 +76,20 @@
             <artifactId>MineManiaAPI</artifactId>
             <version>3.1.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.Kerbity</groupId>
+            <artifactId>Kerb</artifactId>
+            <version>1.11.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>1.9.2</version>
+            <scope>test</scope>
+        </dependency>
+
 
         <!-- PlaceholderAPI -->
         <dependency>
