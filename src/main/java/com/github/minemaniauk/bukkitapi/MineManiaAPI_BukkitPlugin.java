@@ -33,12 +33,12 @@ import com.github.cozyplugins.cozylibrary.user.User;
 import com.github.minemaniauk.api.MineManiaAPI;
 import com.github.minemaniauk.api.MineManiaAPIContract;
 import com.github.minemaniauk.api.MineManiaLocation;
+
 import com.github.minemaniauk.api.database.collection.UserCollection;
 import com.github.minemaniauk.api.database.record.UserRecord;
 import com.github.minemaniauk.api.kerb.event.player.PlayerChatEvent;
 import com.github.minemaniauk.api.kerb.event.useraction.*;
 import com.github.minemaniauk.api.user.MineManiaUser;
-import com.github.minemaniauk.bukkitapi.inventory.InviteListInventory;
 import com.github.minemaniauk.bukkitapi.inventory.MenuInventory;
 import com.github.minemaniauk.bukkitapi.listener.PlayerChatListener;
 import com.github.minemaniauk.developertools.console.Console;
@@ -55,6 +55,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -68,11 +69,22 @@ public final class MineManiaAPI_BukkitPlugin extends CozyPlugin implements MineM
 
     private static @NotNull MineManiaAPI_BukkitPlugin instance;
     private @NotNull Configuration configuration;
+    private @NotNull Configuration servers;
     private @NotNull MineManiaAPI api;
     private @NotNull Map<UUID, MineManiaLocation> teleportMap;
 
     public MineManiaAPI_BukkitPlugin(@NotNull JavaPlugin plugin) {
         super(plugin);
+    }
+
+    /**
+     * Used to get the instance of the bukkit api.
+     * This can be called from any other plugin.
+     *
+     * @return The instance of the bukkit api.
+     */
+    public static @NotNull MineManiaAPI_BukkitPlugin getInstance() {
+        return MineManiaAPI_BukkitPlugin.instance;
     }
 
     @Override
@@ -91,6 +103,18 @@ public final class MineManiaAPI_BukkitPlugin extends CozyPlugin implements MineM
                 .create(this.getPlugin().getDataFolder(), "config.yml");
         this.configuration.setResourcePath("config.yml");
         this.configuration.load();
+
+        File file = new File(getPlugin().getDataFolder(), "servers.yml");
+        if (!file.exists()) {
+            getPlugin().saveResource("servers.yml", false); // false = do not overwrite if exists
+
+        }
+
+
+        this.servers = ConfigurationFactory.YAML
+                .create(this.getPlugin().getDataFolder(), "servers.yml");
+        this.servers.setResourcePath("servers.yml");
+        this.servers.load();
 
         // Set up the api.
         this.api = MineManiaAPI.createAndSet(this.configuration, this);
@@ -118,18 +142,6 @@ public final class MineManiaAPI_BukkitPlugin extends CozyPlugin implements MineM
                     @Override
                     public @Nullable CommandStatus onUser(@NotNull PlayerUser user, @NotNull CommandArguments arguments) {
                         new MenuInventory().open(user.getPlayer());
-                        return new CommandStatus();
-                    }
-                })
-        );
-
-        commandManager.addCommand(new ProgrammableCommand("invites")
-                .setDescription("Used to open the game invites menu.")
-                .setSyntax("/invites")
-                .setPlayer(new ProgrammableExecutor<>() {
-                    @Override
-                    public @Nullable CommandStatus onUser(@NotNull PlayerUser user, @NotNull CommandArguments arguments) {
-                        new InviteListInventory().open(user.getPlayer());
                         return new CommandStatus();
                     }
                 })
@@ -290,6 +302,10 @@ public final class MineManiaAPI_BukkitPlugin extends CozyPlugin implements MineM
         return this.configuration;
     }
 
+    public @NotNull Configuration getServers() {
+        return this.servers;
+    }
+
     /**
      * Used to get this client name used in
      * kerb events.
@@ -348,15 +364,5 @@ public final class MineManiaAPI_BukkitPlugin extends CozyPlugin implements MineM
                 .getUserRecord(playerUuid)
                 .orElse(new UserRecord())
                 .getPaws();
-    }
-
-    /**
-     * Used to get the instance of the bukkit api.
-     * This can be called from any other plugin.
-     *
-     * @return The instance of the bukkit api.
-     */
-    public static @NotNull MineManiaAPI_BukkitPlugin getInstance() {
-        return MineManiaAPI_BukkitPlugin.instance;
     }
 }

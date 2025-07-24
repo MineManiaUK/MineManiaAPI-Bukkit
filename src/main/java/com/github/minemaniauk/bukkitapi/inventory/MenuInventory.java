@@ -24,12 +24,15 @@ import com.github.cozyplugins.cozylibrary.inventory.CozyInventory;
 import com.github.cozyplugins.cozylibrary.inventory.InventoryItem;
 import com.github.cozyplugins.cozylibrary.inventory.action.action.ClickAction;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
+
+import java.util.*;
+import java.util.stream.Collectors;
 import com.github.minemaniauk.api.MineManiaLocation;
-import com.github.minemaniauk.api.database.collection.GameRoomCollection;
-import com.github.minemaniauk.api.database.record.GameRoomRecord;
-import com.github.minemaniauk.api.game.Arena;
 import com.github.minemaniauk.api.user.MineManiaUser;
 import com.github.minemaniauk.bukkitapi.MineManiaAPI_BukkitPlugin;
+import com.github.squishylib.configuration.Configuration;
+import com.github.squishylib.configuration.ConfigurationSection;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -54,20 +57,26 @@ public class MenuInventory extends CozyInventory {
     @Override
     protected void onGenerate(PlayerUser openUser) {
 
+        Configuration serversYaml = MineManiaAPI_BukkitPlugin.getInstance().getServers();
+
         // SMP button.
         this.setTeleportItem(
                 "smp",
                 "&a&lSMP",
+                Material.PINK_STAINED_GLASS_PANE,
                 List.of("&7Click to teleport to the public smp."),
-                List.of(0, 1, 9, 10)
+                List.of(0, 1, 9, 10),
+                1
         );
 
         // World of calm button.
         this.setTeleportItem(
                 "worldofcalm",
                 "&b&lWorld of Calm",
+                Material.PINK_STAINED_GLASS_PANE,
                 List.of("&7Click to teleport to the world of calm."),
-                List.of(2, 3, 11, 12)
+                List.of(2, 3, 11, 12),
+                1
         );
 
         // Games button.
@@ -75,43 +84,22 @@ public class MenuInventory extends CozyInventory {
                 .setMaterial(Material.PINK_STAINED_GLASS_PANE)
                 .setCustomModelData(1)
                 .setName("&d&lGames")
-                .setLore("&7Click to view the games and the game rooms.")
+                .setLore("&7Click to view the game servers.")
                 .addSlot(4, 5, 13, 14)
                 .addAction((ClickAction) (user, type, inventory) -> {
-
-                    // Check if the user is in a game room.
-                    final GameRoomRecord record = MineManiaAPI_BukkitPlugin.getInstance().getAPI().getDatabase()
-                            .getTable(GameRoomCollection.class)
-                            .getGameRoomFromPlayer(user.getUuid())
-                            .orElse(null);
-
-                    if (record == null) {
-                        // Otherwise, open the game inventory.
-                        new GameInventory().open(user.getPlayer());
-                        return;
-                    }
-
-                    // Check if the game room is in a game.
-                    final Arena arena = MineManiaAPI_BukkitPlugin.getInstance().getAPI()
-                            .getGameManager()
-                            .getArena(record.getUuid())
-                            .orElse(null);
-
-                    if (arena == null) {
-                        new GameRoomInventory(record.getUuid()).open(user.getPlayer());
-                        return;
-                    }
-
-                    new JoinGameInventory(record.getUuid()).open(user.getPlayer());
-                })
+                    new GamesMenuInventory().open(user.getPlayer());
+                 })
         );
+
 
         // Battlegrounds button.
         this.setTeleportItem(
                 "battlegroundssmp",
                 "&c&lBattle Grounds",
+                Material.PINK_STAINED_GLASS_PANE,
                 List.of("&7Click to teleport to the battle grounds world."),
-                List.of(6, 7, 15, 16)
+                List.of(6, 7, 15, 16),
+                1
         );
 
         // Other button.
@@ -125,18 +113,34 @@ public class MenuInventory extends CozyInventory {
                 })
         );
 
-        // Profile button.
-        this.setItem(new InventoryItem()
-                .setMaterial(Material.PINK_STAINED_GLASS_PANE)
-                .setCustomModelData(1)
-                .setName("&d&lProfile")
-                .setLore("&7",
-                        "&7Paws &f" + MineManiaAPI_BukkitPlugin.getInstance().getPaws(openUser.getUuid()))
-                .addSlot(23, 24, 25, 26,
-                        32, 33, 34, 35,
-                        41, 42, 43, 44,
-                        50, 51, 52, 53)
-        );
+
+        ConfigurationSection servers = MineManiaAPI_BukkitPlugin.getInstance()
+                .getServers()
+                .getSection("main");
+
+        for (String key : servers.getKeys()) {
+            ConfigurationSection s = servers.getSection(key);
+
+            String name = s.getString("name");
+            String matStr = s.getString("material");
+            Material material = Material.matchMaterial(matStr);
+            List<String> lore = s.getListString("lore");
+            int pos = s.getInteger("position");
+
+            setTeleportItem(
+                    key,
+                    name,
+                    material,
+                    lore,
+                    Collections.singletonList(pos),
+                    0
+            );
+        }
+
+
+
+
+
     }
 
     /**
@@ -144,13 +148,15 @@ public class MenuInventory extends CozyInventory {
      *
      * @param serverName The name of the server.
      * @param name       The name of the item.
+     * @param material   The material of the item.
      * @param lore       The lore of the item.
      * @param slots      The slots to place the item.
+     * @param modelData  The model data of the item.
      */
-    private void setTeleportItem(@NotNull String serverName, @NotNull String name, @NotNull List<String> lore, List<Integer> slots) {
+    private void setTeleportItem(@NotNull String serverName, @NotNull String name, @NotNull Material material, @NotNull List<String> lore, List<Integer> slots, @NotNull Integer modelData) {
         this.setItem(new InventoryItem()
-                .setMaterial(Material.PINK_STAINED_GLASS_PANE)
-                .setCustomModelData(1)
+                .setMaterial(material)
+                .setCustomModelData(modelData)
                 .setName(name)
                 .setLore(lore)
                 .addSlotList(slots)
@@ -160,7 +166,7 @@ public class MenuInventory extends CozyInventory {
 
                     // Teleport the player.
                     mineManiaUser.getActions().teleport(location);
-                })
-        );
+                }));
+
     }
 }

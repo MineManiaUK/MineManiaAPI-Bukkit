@@ -20,6 +20,9 @@
 
 package com.github.minemaniauk.bukkitapi.inventory;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import com.github.cozyplugins.cozylibrary.inventory.CozyInventory;
 import com.github.cozyplugins.cozylibrary.inventory.InventoryItem;
 import com.github.cozyplugins.cozylibrary.inventory.action.action.ClickAction;
@@ -33,77 +36,60 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
-public class MenuInventoryPage2 extends CozyInventory {
+public class GamesMenuInventory extends CozyInventory {
 
-    /**
-     * Used to create a new instance of the menu.
-     */
-    public MenuInventoryPage2() {
-        super(54, "&f₴₴₴₴₴₴₴₴✣");
-    }
+    public GamesMenuInventory() { super(54, "&f₴₴₴₴₴₴₴₴⏅"); }
     Configuration serversYaml = MineManiaAPI_BukkitPlugin.getInstance().getServers();
 
     @Override
-    protected void onGenerate(PlayerUser openUser) {
+    protected void onGenerate(PlayerUser playerUser) {
 
-        // Creative.
+        // Bedwars button
         this.setTeleportItem(
-                "creative",
-                "&a&lCreative",
+                "bedwars",
+                "&r&l&dBedwars",
                 Material.PINK_STAINED_GLASS_PANE,
-                List.of("&7Click to teleport to the creative world."),
-                List.of(1, 2, 10, 11),
+                List.of("&r&7Teleport to Bedwars"),
+                List.of(0, 1, 9, 10),
                 1
         );
 
-        // Sky block.
+        // Hide and Seek button
         this.setTeleportItem(
-                "skyblock",
-                "&b&lSky Block",
+                "hideandseek",
+                "&r&l&aHide and Seek",
                 Material.PINK_STAINED_GLASS_PANE,
-                List.of("&7Click to teleport to the sky block server."),
-                List.of(3, 4, 12, 13),
+                List.of("&r&7Teleport to Hide and Seek"),
+                List.of(2, 3, 11, 12),
                 1
         );
 
-        // Battlegrounds button.
+        // Skywars button
         this.setTeleportItem(
-                "craftyland",
-                "&d&lCrafty Land",
+                "skywars",
+                "&r&l&dSkywars",
                 Material.PINK_STAINED_GLASS_PANE,
-                List.of("&7Click to teleport to crafty land."),
-                List.of(5, 6, 14, 15),
+                List.of("&r&7Teleport to Skywars"),
+                List.of(4, 5, 13, 14),
                 1
         );
 
-        // Other button.
-        this.setItem(new InventoryItem()
-                .setMaterial(Material.PINK_STAINED_GLASS_PANE)
-                .setCustomModelData(1)
-                .setName("&a&lBack")
-                .addSlot(0, 9)
-                .addAction((ClickAction) (user, type, inventory) -> {
-                    new MenuInventory().open(user.getPlayer());
-                })
-        );
-
-        // Battlegrounds button.
+        // Capture the flag button
         this.setTeleportItem(
-                "dungeons",
-                "&c&lDungeons",
+                "capturetheflag",
+                "&r&l&9Capture The Flag",
                 Material.PINK_STAINED_GLASS_PANE,
-                List.of("&7Click to teleport to the dungeons."),
-                List.of(7, 8, 16, 17),
+                List.of("&r&7Teleport the Capture the Flag "),
+                List.of(6, 7, 15, 16),
                 1
         );
 
         ConfigurationSection servers = MineManiaAPI_BukkitPlugin.getInstance()
                 .getServers()
-                .getSection("main");
+                .getSection("games");
 
         for (String key : servers.getKeys()) {
             ConfigurationSection s = servers.getSection(key);
@@ -124,6 +110,7 @@ public class MenuInventoryPage2 extends CozyInventory {
             );
         }
     }
+
 
     /**
      * Used to set a teleport item into the inventory.
