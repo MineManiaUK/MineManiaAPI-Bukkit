@@ -104,23 +104,13 @@ public final class MineManiaAPI_BukkitPlugin extends CozyPlugin implements MineM
         this.configuration.setResourcePath("config.yml");
         this.configuration.load();
 
-        File file = new File(getPlugin().getDataFolder(), "servers.yml");
-        if (!file.exists()) {
-            getPlugin().saveResource("servers.yml", false); // false = do not overwrite if exists
-
-        }
-
-
-        this.servers = ConfigurationFactory.YAML
-                .create(this.getPlugin().getDataFolder(), "servers.yml");
-        this.servers.setResourcePath("servers.yml");
-        this.servers.load();
-
         // Set up the api.
         this.api = MineManiaAPI.createAndSet(this.configuration, this);
 
         // Set up the teleport list.
         this.teleportMap = new HashMap<>();
+
+        DatabaseConnection.Connect(configuration.getString("database.connection_string"), configuration.getString("database.database_name"));
 
         // Register events.
         this.getPlugin().getServer().getPluginManager().registerEvents(new PlayerChatListener(), this.getPlugin());

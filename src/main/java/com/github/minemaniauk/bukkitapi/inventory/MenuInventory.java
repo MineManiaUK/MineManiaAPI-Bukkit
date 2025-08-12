@@ -26,13 +26,16 @@ import com.github.cozyplugins.cozylibrary.inventory.action.action.ClickAction;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import com.github.minemaniauk.api.MineManiaLocation;
 import com.github.minemaniauk.api.user.MineManiaUser;
+import com.github.minemaniauk.bukkitapi.DatabaseConnection;
+import com.github.minemaniauk.bukkitapi.MenuSections;
 import com.github.minemaniauk.bukkitapi.MineManiaAPI_BukkitPlugin;
-import com.github.squishylib.configuration.Configuration;
 import com.github.squishylib.configuration.ConfigurationSection;
-import org.bukkit.Bukkit;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -56,8 +59,6 @@ public class MenuInventory extends CozyInventory {
 
     @Override
     protected void onGenerate(PlayerUser openUser) {
-
-        Configuration serversYaml = MineManiaAPI_BukkitPlugin.getInstance().getServers();
 
         // SMP button.
         this.setTeleportItem(
@@ -114,18 +115,31 @@ public class MenuInventory extends CozyInventory {
         );
 
 
-        ConfigurationSection servers = MineManiaAPI_BukkitPlugin.getInstance()
-                .getServers()
-                .getSection("main");
+        MongoCollection<Document> col = DatabaseConnection.getMongoDatabase().getCollection("MenuServers");
 
-        for (String key : servers.getKeys()) {
-            ConfigurationSection s = servers.getSection(key);
+// Pull menu.server.main  --> returns Map<String,Object>
+        Map<String, Object> servers = MenuSections.loadMenuSectionMap(col, "server.main");
+        if (servers.isEmpty()) return;
 
-            String name = s.getString("name");
-            String matStr = s.getString("material");
+        for (Map.Entry<String, Object> entry : servers.entrySet()) {
+            String key = entry.getKey();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> s = (Map<String, Object>) entry.getValue();
+
+            String name = (String) ChatColor.RESET.toString() + s.get("name");
+            String matStr = (String) s.get("item");
             Material material = Material.matchMaterial(matStr);
-            List<String> lore = s.getListString("lore");
-            int pos = s.getInteger("position");
+
+            @SuppressWarnings("unchecked")
+            List<String> lore = (s.get("lore") instanceof List)
+                    ? ((List<?>) s.get("lore"))
+                    .stream()
+                    .map(line -> "&r" + String.valueOf(line))
+                    .toList()
+                    : java.util.Collections.emptyList();
+
+
+            int pos = s.get("position") == null ? 0 : ((Number) s.get("position")).intValue();
 
             setTeleportItem(
                     key,
@@ -136,10 +150,6 @@ public class MenuInventory extends CozyInventory {
                     0
             );
         }
-
-
-
-
 
     }
 
@@ -168,5 +178,26 @@ public class MenuInventory extends CozyInventory {
                     mineManiaUser.getActions().teleport(location);
                 }));
 
+    }
+
+    private void loadIntoSquishySection(ConfigurationSection section, Document document) {
+        for (Map.Entry<String, Object> entry : document.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            if (value instanceof Document subDocument) {
+                // Create subsection implicitly by setting an empty map first
+                section.set(key, new HashMap<>()); // Ensures section exists
+                ConfigurationSection subSection = section.getSection(key);
+                loadIntoSquishySection(subSection, subDocument);
+            } else {
+                section.set(key, value);
+            }
+        }
+    }
+
+
+    private MongoDatabase getMongoDataBase(){
+        return DatabaseConnection.getMongoDatabase();
     }
 }
